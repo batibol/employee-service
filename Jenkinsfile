@@ -12,16 +12,7 @@ pipeline{
                 sh 'mvn clean'
             }
         }
-        stage('package')
-        {
-         tools {
-                maven 'maven'
-                jdk 'Java'
-         }
-            steps {
-                sh 'mvn package -DskipTests'
-            }
-        }
+
         stage('build docker image')
         {
             when{
