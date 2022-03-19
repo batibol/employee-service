@@ -14,6 +14,10 @@ pipeline{
         }
         stage('package')
         {
+         tools {
+                maven 'maven'
+                jdk 'Java'
+         }
             steps {
                 sh 'mvn package -DskipTests'
             }
