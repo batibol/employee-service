@@ -4,6 +4,9 @@ pipeline{
        maven 'maven'
        jdk 'Java'
    }
+   environment {
+           dockerhub=credentials('batibol-dockerhub')
+       }
 
     stages{
         stage('clean')
