@@ -1,42 +1,38 @@
-pipeline{
-    agent any
-   tools {
-       maven 'maven'
-       jdk 'Java'
-   }
+pipeline {
+   agent any
+
    environment {
-           dockerhub=credentials('batibol-dockerhub')
-       }
+     // You must set the following environment variables
+     // ORGANIZATION_NAME
+     // YOUR_DOCKERHUB_USERNAME (it doesn't matter if you don't have one)
 
-    stages{
-        stage('clean')
-        {
-            steps{
-                sh 'mvn clean'
-            }
-        }
+     SERVICE_NAME = "employee-svc"
+     REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
+   }
 
-        stage('build docker image')
-        {
-            when{
-                branch "master"
-                }
-            steps{
-                sh 'docker build -t employee-svc:1.01 .'
-            }
-        }
-        stage('pushing to dockerhub')
-        {
-            when{
-                branch "master"
-                }
-            steps{
-                sh 'docker tag employee-svc:1.01 batibol/employee-svc:1.01 '
-                sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
+   stages {
+      stage('Preparation') {
+         steps {
+            cleanWs()
+            git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
+         }
+      }
+      stage('Build') {
+         steps {
+            sh 'echo No build required for Webapp.'
+         }
+      }
 
-                sh 'docker push batibol/employee-svc:1.01 '
-            }
-        }
+      stage('Build and Push Image') {
+         steps {
+           sh 'docker image build -t ${REPOSITORY_TAG} .'
+         }
+      }
 
-    }
+      stage('Deploy to Cluster') {
+          steps {
+            sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
+          }
+      }
+   }
 }

@@ -1,6 +1,7 @@
 FROM maven:3.8-jdk-11 As builder
 WORKDIR /employee-service
 COPY . .
+RUN mvn clean
 RUN mvn package -DskipTests
 
 
