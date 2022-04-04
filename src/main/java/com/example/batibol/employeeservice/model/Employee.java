@@ -1,8 +1,10 @@
 package com.example.batibol.employeeservice.model;
 
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity(name = "Employee")
 @Table(name = "employee")
@@ -10,10 +12,19 @@ public class Employee extends RepresentationModel<Employee> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank
+    @Column(nullable = false)
     private String name;
+
     private String role;
 
     public Employee() {
+    }
+
+    public Employee(Long id, String name, String role) {
+        this.id = id;
+        this.name = name;
+        this.role = role;
     }
 
     public Employee(String name, String role) {
