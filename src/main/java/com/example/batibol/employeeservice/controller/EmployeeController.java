@@ -1,22 +1,18 @@
 package com.example.batibol.employeeservice.controller;
 
 import com.example.batibol.employeeservice.assembler.EmployeeModelAssembler;
-import com.example.batibol.employeeservice.exceptions.EmployeeNotFoundException;
 import com.example.batibol.employeeservice.model.Employee;
-import com.example.batibol.employeeservice.repository.EmployeeRepository;
+import com.example.batibol.employeeservice.service.ServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
 
-import javax.swing.text.html.Option;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -26,64 +22,55 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Service
 @RequestMapping("/api/v1")
 public class EmployeeController {
-    private final EmployeeRepository repository;
+    private final ServiceEmployee employeeService;
     private final EmployeeModelAssembler assembler;
 
     @Autowired
-    public EmployeeController(EmployeeRepository repository, EmployeeModelAssembler assembler) {
-        this.repository = repository;
+    public EmployeeController(
+                              ServiceEmployee employeeService,
+                              EmployeeModelAssembler assembler) {
+        this.employeeService = employeeService;
         this.assembler = assembler;
     }
 
     @GetMapping("/employees")
-    public CollectionModel<EntityModel<Employee>> all() {
-
-        List<EntityModel<Employee>> employees = repository.findAll().stream() //
+    public CollectionModel<EntityModel<Employee>> getAllEmployees() {
+        List<EntityModel<Employee>> employees = employeeService.getAllEmployees().stream() //
                 .map(assembler::toModel) //
                 .collect(Collectors.toList());
 
-        return CollectionModel.of(employees, linkTo(methodOn(EmployeeController.class).all()).withSelfRel());
+        return CollectionModel.of(employees, linkTo(methodOn(EmployeeController.class).getAllEmployees()).withSelfRel());
     }
 
     @PostMapping("/employees")
-    ResponseEntity<?> newEmployee(@RequestBody Employee newEmployee) {
-        EntityModel<Employee> entityModel = assembler.toModel(repository.save(newEmployee));
+    ResponseEntity<?> newEmployee(@Valid @RequestBody Employee newEmployee) {
+        EntityModel<Employee> entityModel = assembler.toModel(employeeService.addNewEmployee(newEmployee));
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel);
     }
     @GetMapping("/employees/{employeeId}")
-    public EntityModel<Employee> one(@PathVariable("employeeId") Long employeeId) {
-        Employee employee = repository.findById(employeeId)
-                .orElseThrow(()->new EmployeeNotFoundException(employeeId));
-
+    public EntityModel<Employee> getEmployeeById(@PathVariable("employeeId") Long employeeId) {
+        Employee employee = employeeService.getEmployeeById(employeeId);
         return assembler.toModel(employee);
     }
 
     @PutMapping("/employees/{employeeId}")
     ResponseEntity<?> replaceEmployee(@PathVariable("employeeId") Long employeeId, @RequestBody Employee newEmployee) {
-        Boolean exists = repository.existsById(employeeId);
-        if (!exists) {
-            throw new EmployeeNotFoundException(employeeId);
-        }
-        Employee employee = repository.findById(employeeId).get();
+        Employee employee = employeeService.getEmployeeById(employeeId);
         employee.setName(newEmployee.getName());
         employee.setRole(newEmployee.getRole());
-        repository.save(employee);
+        employeeService.addNewEmployee(employee);
         EntityModel<Employee> entityModel = assembler.toModel(employee);
-        return ResponseEntity //
+        return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
                 .body(entityModel);
-        //return employee;
+
     }
 
     @DeleteMapping("/employees/{employeeId}")
     ResponseEntity<?> deleteEmployee(@PathVariable("employeeId") Long employeeId) {
-        Boolean exists = repository.existsById(employeeId);
-        if (!exists) {
-            throw new EmployeeNotFoundException(employeeId);
-        }
-        repository.deleteById(employeeId);
+        employeeService.deleteEmployeeById(employeeId);
         return ResponseEntity.noContent().build();
     }
 }

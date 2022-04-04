@@ -14,7 +14,7 @@ public class EmployeeServiceApplication {
 		SpringApplication.run(EmployeeServiceApplication.class, args);
 
 	}
-	@Bean
+	/*@Bean
 	CommandLineRunner commandLineRunner (EmployeeRepository employeeRepository) {
 		return args -> {
 			employeeRepository.save(new Employee("Peter Kadima", "IT"));
@@ -22,6 +22,6 @@ public class EmployeeServiceApplication {
 			employeeRepository.save(new Employee("Jonathan Kembo", "Support"));
 
 		};
-	}
+	}*/
 
 }
