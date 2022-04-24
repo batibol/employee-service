@@ -1,8 +1,5 @@
 pipeline {
    agent any
-   tools {
-       docker 'docker'
-   }
 
    environment {
      // You must set the following environment variables
