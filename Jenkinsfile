@@ -35,7 +35,7 @@ pipeline {
          }
       }
 
-      stage('Build and Push Image') {
+      stage('Build image') {
          steps {
            sh 'docker image build -t employee-svc .'
          }
