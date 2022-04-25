@@ -22,7 +22,11 @@ pipeline {
             sh 'echo No build required for Webapp.'
          }
       }
-      
+      stage ('Tests') {
+         steps {
+            sh './mvnw test'
+         }
+      }
       stage('Sonnar scan') {
          steps {
             withSonarQubeEnv(installationName: 'sq1') {
