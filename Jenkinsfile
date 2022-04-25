@@ -27,7 +27,7 @@ pipeline {
             sh './mvnw test'
          }
       }
-      stage('Sonnar scan') {
+      stage('Sonnarq scan') {
          steps {
             withSonarQubeEnv(installationName: 'sq1') {
              sh './mvnw clean install org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.sources=src/main/java/ -Dsonar.java.binaries=./target/classes'
